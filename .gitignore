@@ -1,0 +1,8 @@
+.venv
+.env
+__pycache__
+models
+.vscode
+data
+*logs
+.*cache
