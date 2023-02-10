@@ -1,47 +1,48 @@
-import torch
-import torch.nn.functional as F
-import torchtext.transforms as T
+import argparse
 
 from pytorch_lightning import Trainer
+from pytorch_lightning.loggers import WandbLogger
+from torch.utils.data import DataLoader
 from torchtext.datasets import Multi30k
-from torchtext.data.utils import get_tokenizer
 
 from transformer import AttentionV1
+from utils import get_sentence_preprocessor_info
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--epochs", default=10, type=int)
+parser.add_argument("--wandb_api_key", type=str, required=True)
+parser.add_argument("--batch_size", type=int, default=32)
+args = vars(parser.parse_args())
 
-src_vocab_transform = T.VocabTransform(torch.load("models/src_vocab.pth"))
-tgt_vocab_transform = T.VocabTransform(torch.load("models/tgt_vocab.pth"))
+preprocessor_info = get_sentence_preprocessor_info()
 
-src_transform = T.Sequential(
-    src_vocab_transform,
-    T.Truncate(100),
-    T.AddToken(token=0, begin=True),
-    T.AddToken(token=2, begin=False),
-    T.ToTensor(padding_value=1)
-)
-tgt_transform = T.Sequential(
-    tgt_vocab_transform,
-    T.Truncate(100),
-    T.AddToken(token=0, begin=True),
-    T.AddToken(token=2, begin=False),
-    T.ToTensor(padding_value=1)
-)
+train_dataset = Multi30k(root="data", split="train").map(lambda x: (preprocessor_info["src_tokenizer"](x[0]), preprocessor_info["tgt_tokenizer"](x[1])))\
+                                                    .batch(args["batch_size"])\
+                                                    .rows2columnar(["src", "tgt"])\
+                                                    .map(preprocessor_info["sentence_preprocessor"])
+                                              
+val_dataset = Multi30k(root="data", split="dev").map(lambda x: (preprocessor_info["src_tokenizer"](x[0]), preprocessor_info["tgt_tokenizer"](x[1])))\
+                                                .batch(args["batch_size"])\
+                                                .rows2columnar(["src", "tgt"])\
+                                                .map(preprocessor_info["sentence_preprocessor"])
 
-src_tokenizer = get_tokenizer("spacy", "en_core_web_sm")
-tgt_tokenizer = get_tokenizer("spacy", "de_core_news_sm")
+train_dataloaders = DataLoader(train_dataset, batch_size=None, shuffle=True)
+val_dataloaders = DataLoader(val_dataset, batch_size=None)
 
-def apply_transform(x):
-    src, tgt = x["src"], x["tgt"]
-    
-    return src_transform(src), tgt_transform(tgt)
+model = AttentionV1(len(preprocessor_info["src_transform"][3].vocab), 
+                    len(preprocessor_info["tgt_transform"][3].vocab), 
+                    512, 
+                    8)
 
-dataset = Multi30k(root="data", split="train").map(lambda x: (src_tokenizer(x[0]), tgt_tokenizer(x[1])))\
-                                              .batch(32)\
-                                              .rows2columnar(["src", "tgt"])\
-                                              .map(apply_transform)
+logger = WandbLogger(project="AttentionWMT",
+                     name="Attention")
 
-model = AttentionV1(len(src_vocab_transform.vocab), len(tgt_vocab_transform.vocab), 512, 8)
-trainer = Trainer(accelerator="cpu",
-                  max_epochs=1)
-trainer.fit(model=model, train_dataloaders=dataset)
+trainer = Trainer(accelerator="gpu",
+                  max_epochs=args["epochs"],
+                  logger=logger,
+                  enable_progress_bar=False)
+
+trainer.fit(model=model, 
+            train_dataloaders=train_dataloaders, 
+            val_dataloaders=val_dataloaders)
 
