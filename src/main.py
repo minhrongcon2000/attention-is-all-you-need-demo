@@ -1,4 +1,5 @@
 import argparse
+import os
 
 from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import WandbLogger
@@ -13,6 +14,8 @@ parser.add_argument("--epochs", default=10, type=int)
 parser.add_argument("--wandb_api_key", type=str, required=True)
 parser.add_argument("--batch_size", type=int, default=32)
 args = vars(parser.parse_args())
+
+os.environ["WANDB_API_KEY"] = args["wandb_api_key"]
 
 preprocessor_info = get_sentence_preprocessor_info()
 
