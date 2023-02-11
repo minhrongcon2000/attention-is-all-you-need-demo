@@ -65,7 +65,7 @@ class AttentionV1(pl.LightningModule):
         self.train_loss = loss
         # self.train_bleu = bleu_score
         self.log("train_loss", loss)
-        self.log("lr", self._get_lr_scale(batch_idx + 1))
+        self.log("lr", self._get_lr_scale(batch_idx))
         # self.log("train_bleu_score", bleu_score)
         return loss
     
