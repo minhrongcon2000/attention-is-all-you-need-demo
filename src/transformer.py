@@ -1,15 +1,12 @@
 import pytorch_lightning as pl
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 from torch.optim import Adam
 from torch.optim.lr_scheduler import LambdaLR
-from torchmetrics import BLEUScore
 
 from decoder.decoder import Decoder
 from encoder.encoder import Encoder
-from utils import calc_bleu_score
 
 
 class AttentionV1(pl.LightningModule):
@@ -64,11 +61,11 @@ class AttentionV1(pl.LightningModule):
         label = F.one_hot(tgt, num_classes=self.tgt_vocab_len).float()
         pred = self.forward(src, tgt)
         loss = F.cross_entropy(pred, label, label_smoothing=0.1)
-        bleu_score = calc_bleu_score(src, tgt, self)
+        # bleu_score = calc_bleu_score(src, tgt, self)
         self.train_loss = loss
-        self.train_bleu = bleu_score
+        # self.train_bleu = bleu_score
         self.log("train_loss", loss)
-        self.log("train_bleu_score", bleu_score)
+        # self.log("train_bleu_score", bleu_score)
         return loss
     
     def validation_step(self, val_batch, val_idx):
@@ -76,13 +73,13 @@ class AttentionV1(pl.LightningModule):
         label = F.one_hot(tgt, num_classes=self.tgt_vocab_len).float()
         pred = self.forward(src, tgt)
         loss = F.cross_entropy(pred, label, label_smoothing=0.1)
-        bleu_score = calc_bleu_score(src, tgt, self)
+        # bleu_score = calc_bleu_score(src, tgt, self)
         self.log("val_loss", loss)
-        self.log("val_bleu_score", bleu_score)
+        # self.log("val_bleu_score", bleu_score)
         
     def on_train_epoch_end(self) -> None:
         self.epoch_cnt += 1
-        print(f"Epoch {self.epoch_cnt}, train_loss {self.train_loss}, bleu {self.train_bleu}")
+        print(f"Epoch {self.epoch_cnt}, train_loss {self.train_loss}")
     
     def _get_lr_scale(self, step: int):
         step_num = step + 1
