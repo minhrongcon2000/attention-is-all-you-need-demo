@@ -21,7 +21,7 @@ train_dataset = Multi30k(root="data", split="train").map(lambda x: (preprocessor
                                                     .rows2columnar(["src", "tgt"])\
                                                     .map(preprocessor_info["sentence_preprocessor"])
                                               
-val_dataset = Multi30k(root="data", split="dev").map(lambda x: (preprocessor_info["src_tokenizer"](x[0]), preprocessor_info["tgt_tokenizer"](x[1])))\
+val_dataset = Multi30k(root="data", split="valid").map(lambda x: (preprocessor_info["src_tokenizer"](x[0]), preprocessor_info["tgt_tokenizer"](x[1])))\
                                                 .batch(args["batch_size"])\
                                                 .rows2columnar(["src", "tgt"])\
                                                 .map(preprocessor_info["sentence_preprocessor"])
