@@ -36,8 +36,8 @@ model = AttentionV1(src_vocab_len=len(preprocessor_info["src_transform"][3].voca
                     tgt_vocab_len=len(preprocessor_info["tgt_transform"][3].vocab), 
                     embed_dim=512, 
                     num_head=8,
-                    src_padding_idx=preprocessor_info["src_transform"].vocab["<pad>"],
-                    tgt_padding_idx=preprocessor_info["tgt_transform"].vocab["<pad>"])
+                    src_padding_idx=preprocessor_info["src_transform"][3].vocab["<pad>"],
+                    tgt_padding_idx=preprocessor_info["tgt_transform"][3].vocab["<pad>"])
 
 logger = WandbLogger(project="AttentionWMT",
                      name="Attention")
