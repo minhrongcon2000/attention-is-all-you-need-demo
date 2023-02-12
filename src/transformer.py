@@ -81,7 +81,7 @@ class AttentionV1(pl.LightningModule):
         inputs = self.src_pos_embedding(inputs)
         outputs = self.tgt_embedding(outputs)
         outputs = self.tgt_pos_embedding(outputs)
-        print(inputs.shape, outputs.shape)
+        
         # encoder forwards
         for encoder in self.encoder_stack:
             inputs = encoder(inputs, mask=src_mask)
@@ -93,8 +93,6 @@ class AttentionV1(pl.LightningModule):
                               outputs, 
                               slf_attn_mask=tgt_mask, 
                               cross_attn_mask=cross_attn_mask)
-            
-        print(inputs.shape, outputs.shape)
         
         return self.linear(self.norm_decoder(outputs))
     
