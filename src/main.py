@@ -25,17 +25,19 @@ train_dataset = Multi30k(root="data", split="train").map(lambda x: (preprocessor
                                                     .map(preprocessor_info["sentence_preprocessor"])
                                               
 val_dataset = Multi30k(root="data", split="valid").map(lambda x: (preprocessor_info["src_tokenizer"](x[0]), preprocessor_info["tgt_tokenizer"](x[1])))\
-                                                .batch(args["batch_size"])\
-                                                .rows2columnar(["src", "tgt"])\
-                                                .map(preprocessor_info["sentence_preprocessor"])
+                                                  .batch(args["batch_size"])\
+                                                  .rows2columnar(["src", "tgt"])\
+                                                  .map(preprocessor_info["sentence_preprocessor"])
 
 train_dataloaders = DataLoader(train_dataset, batch_size=None, shuffle=True)
 val_dataloaders = DataLoader(val_dataset, batch_size=None)
 
-model = AttentionV1(len(preprocessor_info["src_transform"][3].vocab), 
-                    len(preprocessor_info["tgt_transform"][3].vocab), 
-                    512, 
-                    8)
+model = AttentionV1(src_vocab_len=len(preprocessor_info["src_transform"][3].vocab), 
+                    tgt_vocab_len=len(preprocessor_info["tgt_transform"][3].vocab), 
+                    embed_dim=512, 
+                    num_head=8,
+                    src_padding_idx=preprocessor_info["src_transform"].vocab["<pad>"],
+                    tgt_padding_idx=preprocessor_info["tgt_transform"].vocab["<pad>"])
 
 logger = WandbLogger(project="AttentionWMT",
                      name="Attention")

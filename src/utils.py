@@ -14,14 +14,14 @@ def get_sentence_preprocessor_info():
         T.AddToken(token="<bos>", begin=True),
         T.AddToken(token="<eos>", begin=False),
         src_vocab_transform,
-        T.ToTensor(padding_value=1)
+        T.ToTensor(padding_value=src_vocab_transform.vocab["<pad>"])
     )
     tgt_transform = T.Sequential(
         T.Truncate(100),
         T.AddToken(token="<bos>", begin=True),
         T.AddToken(token="<eos>", begin=False),
         tgt_vocab_transform,
-        T.ToTensor(padding_value=1)
+        T.ToTensor(padding_value=tgt_vocab_transform.vocab["<pad>"])
     )
 
     tgt_tokenizer = get_tokenizer("spacy", "en_core_web_sm")

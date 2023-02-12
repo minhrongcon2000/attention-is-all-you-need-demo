@@ -1,6 +1,7 @@
 import sys
 sys.path.append("..")
 
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -33,12 +34,22 @@ class Decoder(nn.Module):
         )
         self.layer_norm_ffn = nn.LayerNorm(self.embed_dim)
         
-    def forward(self, src_embed, tgt_embed):
-        self_attn_score = self.attn(tgt_embed, tgt_embed, tgt_embed, mask=True)
+    def forward(self, 
+                src_embed, 
+                tgt_embed, 
+                slf_attn_mask: torch.Tensor=None,
+                cross_attn_mask: torch.Tensor=None):
+        self_attn_score = self.attn(tgt_embed, 
+                                    tgt_embed, 
+                                    tgt_embed, 
+                                    mask=slf_attn_mask)
         self_attn_score = F.dropout(self_attn_score, p=self.p_drop)
         self_attn_score_res = self.layer_norm_self_attn(tgt_embed + self_attn_score)
         
-        cross_attn_score = self.cross_attn(src_embed, self_attn_score_res, src_embed)
+        cross_attn_score = self.cross_attn(src_embed, 
+                                           self_attn_score_res, 
+                                           src_embed, 
+                                           mask=cross_attn_mask)
         cross_attn_score = F.dropout(cross_attn_score, p=self.p_drop)
         cross_attn_score_res = self.layer_norm_cross_attn(self_attn_score_res + cross_attn_score)
         

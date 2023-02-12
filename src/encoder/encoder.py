@@ -29,8 +29,8 @@ class Encoder(nn.Module):
         )
         self.layer_norm_ffn = nn.LayerNorm(self.embed_dim)
         
-    def forward(self, inputs: torch.Tensor):
-        attn_score = self.attn(inputs, inputs, inputs)
+    def forward(self, inputs: torch.Tensor, mask: torch.Tensor=None):
+        attn_score = self.attn(inputs, inputs, inputs, mask=mask)
         attn_score = F.dropout(attn_score, self.p_drop)
         attn_score_res = self.layer_norm_attn(inputs + attn_score)
         
