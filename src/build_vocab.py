@@ -52,6 +52,7 @@ src_dev_vocab = build_vocab_from_iterator(src_dev, specials=["unk"], min_freq=MI
 src_vocab = set(src_train_vocab.get_stoi().keys()).union(set(src_dev_vocab.get_stoi().keys()))
 src_vocab.add("<bos>")
 src_vocab.add("<eos>")
+src_vocab.add("<pad>")
 src_vocab = vocab(OrderedDict((src_word, 1) for src_word in src_vocab))
 src_vocab.set_default_index(src_vocab["<unk>"])
 
@@ -61,6 +62,7 @@ tgt_dev_vocab = build_vocab_from_iterator(tgt_dev, specials=["<unk>"], min_freq=
 tgt_vocab = set(tgt_train_vocab.get_stoi().keys()).union(set(tgt_dev_vocab.get_stoi().keys()))
 tgt_vocab.add("<bos>")
 tgt_vocab.add("<eos>")
+tgt_vocab.add("<pad>")
 tgt_vocab = vocab(OrderedDict((tgt_word, 1) for tgt_word in tgt_vocab))
 tgt_vocab.set_default_index(tgt_vocab["<unk>"])
 
