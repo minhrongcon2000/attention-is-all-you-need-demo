@@ -19,4 +19,4 @@ class PositionalEncoder(nn.Module):
         return torch.tensor(pos_tab, dtype=torch.float32).unsqueeze(0) # 1 x S x E
     
     def forward(self, X: torch.Tensor):
-        return X + self.pos_table[:, X.shape[0], :]
+        return X + self.pos_table[:, X.shape[1], :]
