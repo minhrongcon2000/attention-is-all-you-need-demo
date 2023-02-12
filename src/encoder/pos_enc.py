@@ -10,8 +10,8 @@ class PositionalEncoder(nn.Module):
         super().__init__()
         self.max_seq_len = max_seq_len
         self.embed_dim = embed_dim
-        self.pos_table = self._get_pos_enc_table()
         self._device = device
+        self.pos_table = self._get_pos_enc_table()
     
     def _get_pos_angle(self, position, embed_dim):
         return np.array([position / (10000 ** (2 * (i // 2) / embed_dim)) for i in range(embed_dim)], dtype=np.float32) # 1 x E
