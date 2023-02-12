@@ -21,7 +21,8 @@ class AttentionV1(pl.LightningModule):
                  max_src_seq_len: int=100, 
                  max_tgt_seq_len: int=100,
                  dim_ffn: int=2048,
-                 num_stack: int=6) -> None:
+                 num_stack: int=6,
+                 device: str="cuda") -> None:
         super().__init__()
         self.src_vocab_len = src_vocab_len
         self.tgt_vocab_len = tgt_vocab_len
@@ -33,13 +34,16 @@ class AttentionV1(pl.LightningModule):
         self.max_tgt_seq_len = max_tgt_seq_len
         self.src_padding_idx = src_padding_idx
         self.tgt_padding_idx = tgt_padding_idx
+        self._device = device
         
         self.src_embedding = nn.Embedding(self.src_vocab_len, self.embed_dim)
         self.src_pos_embedding = PositionalEncoder(max_seq_len=self.max_src_seq_len, 
-                                                   embed_dim=self.embed_dim)
+                                                   embed_dim=self.embed_dim,
+                                                   device=self._device)
         self.tgt_embedding = nn.Embedding(self.tgt_vocab_len, self.embed_dim)
         self.tgt_pos_embedding = PositionalEncoder(max_seq_len=self.max_tgt_seq_len,
-                                                   embed_dim=self.embed_dim)
+                                                   embed_dim=self.embed_dim,
+                                                   device=self._device)
         self.encoder_stack = nn.ModuleList(Encoder(embed_dim, num_head, dim_ffn) for _ in range(self.num_stack))
         self.decoder_stack = nn.ModuleList(Decoder(embed_dim, num_head, dim_ffn) for _ in range(self.num_stack))
         self.norm_decoder = nn.LayerNorm(self.embed_dim)
